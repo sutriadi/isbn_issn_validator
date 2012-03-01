@@ -27,6 +27,7 @@ if ( ! defined('INDEX_AUTH') || (defined(INDEX_AUTH) AND INDEX_AUTH != 1))
 
 function isbn13($code, $string = false)
 {
+/*
 	$result = false;
 	$ints = str_split($code);
 	$sum = 0;
@@ -44,11 +45,20 @@ function isbn13($code, $string = false)
 	}
 	$mod10 = fmod(10 - fmod($sum, 10), 10);
 	$result = $mod10 == $checknum ? true : false;
+*/
+	// adapted from wikipedia.org
+	$check = 0;
+	for ($i = 0; $i < 13; $i+=2)
+		$check += substr($code, $i, 1);
+	for ($i = 1; $i < 12; $i+=2)
+		$check += 3 * substr($code, $i, 1);
+	$result = $check % 10 == 0;
 	return $string === true ? ($result === true ? 'valid' : 'invalid') : $result;
 }
 
 function isbn10($code, $string = false)
 {
+/*
 	$ints = str_split($code);
 	$start = 10;
 	$sum = 0;
@@ -62,6 +72,14 @@ function isbn10($code, $string = false)
 	}
 	$mod11 = fmod($sum, 11);
 	$result = $mod11 + $checknum == 11 ? true : false;
+*/
+	// adapted from wikipedia.org
+	$check = 0;
+	for ($i = 0; $i < 9; $i++)
+		$check += (10 - $i) * substr($code, $i, 1);
+	$t = substr($code, 9, 1);
+	$check += ($t == 'x' || $t == 'X') ? 10 : $t;
+	$result = $check % 11 == 0;
 	return $string === true ? ($result === true ? 'valid' : 'invalid') : $result;
 }
 
@@ -130,7 +148,7 @@ if ($_POST)
 ?>
 
 	<h3><?php echo __('ISBN/ISSN Validator');?></h3>
-	<?php echo $validation;?>
+	<?php printf('<strong>%s</strong>', $validation);?>
 	<form id="regclient" name="regclient" method="POST" action="?p=isbn_issn_validator">
 		<p>
 			<label for="code">ISBN/ISSN :</label>
